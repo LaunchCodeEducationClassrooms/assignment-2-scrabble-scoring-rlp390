@@ -14,6 +14,7 @@ const oldPointStructure = {
 
 function oldScrabbleScorer(word) {
 	word = word.toUpperCase();
+
 	let letterPoints = "";
  
 	for (let i = 0; i < word.length; i++) {
@@ -33,8 +34,30 @@ function oldScrabbleScorer(word) {
 // don't change the names or your program won't work as expected. //
 
 function initialPrompt() {
-   console.log("Let's play some scrabble! Enter a word:");
+   const input = require('readline-sync');
+   let word = input.question("Let's play some scrabble!  Enter a word:  ");
+   return word;
 };
+
+function simpleScorer(word) {
+  return word.length;
+}
+
+function vowelBonusScorer(word) {
+  let score = 0;
+  let lowerWord = word.toLowerCase();
+  let vowels = ["a", "e", "i","o","u"];
+
+  for (let i = 0; i < word.length; i++) {
+    if (vowels.indexOf(lowerWord[i]) >= 0) {
+      score += 3;
+    } else {
+      score +=1;
+    }
+  }
+  return score
+}
+
 
 let simpleScore;
 
@@ -42,17 +65,71 @@ let vowelBonusScore;
 
 let scrabbleScore;
 
-const scoringAlgorithms = [];
+const scoringAlgorithms = [
+  { name: "Simple Score",
+    description: "Each letter is worth 1 point",
+    scoreFunction: simpleScorer
+  },
+  {
+    name: "Bonus Vowels",
+    description: "Vowels are 3 pts, consonants are 1 pt.",
+    scoreFunction: vowelBonusScorer
+  },
+  {
+    name: "Scrabble",
+    description: "The traditional scoring algorithm.",
+    scoreFunction: scrabbleScorer
+  }
+];
 
-function scorerPrompt() {}
+function scorerPrompt() {
+  const input = require('readline-sync');
+  console.log("Which scoring algorithm would you like to use?\n\n");
 
-function transform() {};
+  for (let i=0; i< scoringAlgorithms.length; i++) {
+    console.log(`${i} - ${scoringAlgorithms[i].name}: ${scoringAlgorithms[i].description}`)
+  }
 
-let newPointStructure;
+  let answer = input.question("Enter 0, 1, or 2: ");
+
+  while (isNaN(Number(answer)) || answer < 0 || answer > 2) {
+    answer = input.question("Invalid choice, enter 0, 1, or 2: ");
+  }
+  
+  return answer;
+}
+
+function transform(object) {
+  const newStructure = {" ": 0};
+
+  for (let i=0; i<11; i++) {
+    if(i in object) {
+      for(let j=0; j<object[i].length;j++) {
+        newStructure[object[i][j].toLowerCase()]=i;
+      }
+    }
+  }
+  return newStructure
+};
+
+let newPointStructure = transform(oldPointStructure);
+
+function scrabbleScorer(word) {
+  let score = 0;
+  word = word.toLowerCase();
+
+  for (let i = 0; i < word.length; i++) {
+
+    score += newPointStructure[word[i]];
+  }
+  return score;
+}
 
 function runProgram() {
-   initialPrompt();
-   
+ let word = initialPrompt();
+ let algorithmChoice = scorerPrompt();
+
+ console.log(`Score for '${word}': ${scoringAlgorithms[algorithmChoice].scoreFunction(word)}`);   
 }
 
 // Don't write any code below this line //
