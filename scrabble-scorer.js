@@ -96,6 +96,7 @@ function scorerPrompt() {
 }
 
 
+
 function transform(object) {
   const newStructure = {};
 
